@@ -5,7 +5,7 @@ Resources:
   MyS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: simple-bucket-ssr001-07092025
+      BucketName: Sub 'codepipeline-s3-${AWS::AccountId}-${AWS::Region}'
 Outputs:
   BucketName:
     Description: The name of the S3 bucket created.

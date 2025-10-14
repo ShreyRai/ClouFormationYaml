@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This is the ec2 yml to understand clf 
+
+Parameters:
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName 
+    Default: ec2main
+  InstanceType:
+    Type: String
+    Default: t3.micro
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-052064a798f08f0d3
+    us-east-2:
+      AMI: ami-077b630ef539aa0b5
+
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allowing SSH 
+      SecurityGroupIngress:
+        - IpProtocol: tcp 
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp  
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      KeyName: !Ref KeyPair
+      SecurityGroups:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: Name  
+          Value: OpenServer1
+
+Outputs:
+  InstanceId:
+    Value: !Ref Ec2Instance
+  PublicIpAddr:
+    Value: !GetAtt Ec2Instance.PublicIp  
+  KeyName:
+    Value: !Ref KeyPair
+  SSHCommand:
+    Value: !Sub "ssh -i ${KeyPair}.pem ec2-user@${Ec2Instance.PublicIp}"  

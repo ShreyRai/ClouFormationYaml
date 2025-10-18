@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A Ec2 which is fully configured 
+
+Parameters:
+  ImageID:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+  InstanceType: 
+    Type: String
+    Default: t3.micro
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: ec2fullmain
+
+Resources:
+  VPC01:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name  
+          Value: VPC01
+  
+  Subnets01:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC01
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - Key: Name  
+          Value: Subnet01
+  
+  IGW01:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: IGW01
+  
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC01
+      InternetGatewayId: !Ref IGW01
+  
+  RouteTable01:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC01
+      Tags:
+        - Key: Name
+          Value: RouteTable01
+
+  Route01:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId: !Ref RouteTable01
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref IGW01
+
+  SubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref Subnets01
+      RouteTableId: !Ref RouteTable01
+  
+  SecurityGroup01:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH and HTTP
+      VpcId: !Ref VPC01
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: SecurityGroup01
+    
+  Ec2:
+    Type: AWS::EC2::Instance
+    Properties:
+      SubnetId: !Ref Subnets01
+      ImageId: !Ref ImageID
+      InstanceType: !Ref InstanceType
+      SecurityGroupIds:  
+        - !Ref SecurityGroup01
+      KeyName: !Ref KeyName
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 8
+            VolumeType: gp3  
+            DeleteOnTermination: true 
+        - DeviceName: /dev/sdf
+          Ebs:
+            VolumeSize: 15
+            VolumeType: gp3  
+            DeleteOnTermination: true  
+      Tags:
+        - Key: Name
+          Value: EC2Instancefull
+
+Outputs:
+  InstanceID:
+    Value: !Ref Ec2
+  PublicIp:
+    Value: !GetAtt Ec2.PublicIp
+  SSHCommand:
+    Value: !Sub "ssh -i ${KeyName}.pem ec2-user@${Ec2.PublicIp}"

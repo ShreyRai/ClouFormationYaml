@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: "2010-09-09"  
+Description: VPC yml file for the infrastructure 
+
+Resources:
+  InfraVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+  
+  InfraSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref InfraVPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select [0, !GetAZs '']
+  
+  InfraIGW:
+    Type: AWS::EC2::InternetGateway
+  
+  AttachIGW:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref InfraVPC
+      InternetGatewayId: !Ref InfraIGW
+  
+  InfraRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref InfraVPC
+  
+  InfraRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachIGW
+    Properties:
+      RouteTableId: !Ref InfraRouteTable
+      #RouteServerId: !Ref InfraRoute
+      #SubnetId: !Ref InfraSubnet
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InfraIGW
+
+  InfraSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref InfraRouteTable
+      SubnetId: !Ref InfraSubnet
+
+Outputs:
+  VPCID:
+    Description: VPC ID 
+    Value: !Ref InfraVPC
+  
+  SubnetID:
+    Description: Subnet ID 
+    Value: !Ref InfraSubnet
+
+  InternetGatewayID:
+    Description: !Ref InfraIGW
+
+      

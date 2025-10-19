@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Ec2 yaml file for infrastructure
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: t3.micro
+  
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: infrastructure-ec2
+
+  SecurityGroupID:
+    Type: String
+  SubnetID:
+    Type: String
+  
+  ImageID:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+Resources:
+  InfraEc2:
+    Type: AWS::EC2::Instance
+    Properties:
+      SubnetId: !Ref SubnetID
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref ImageID
+      KeyName: !Ref KeyName
+      SecurityGroupIds:
+        - !Ref SecurityGroupID
+
+Outputs:
+  InstanceId:
+    Description: EC2 Instance ID
+    Value: !Ref InfraEc2
+  PublicIP:
+    Description: EC2 Public IP
+    Value: !GetAtt InfraEc2.PublicIpAddress

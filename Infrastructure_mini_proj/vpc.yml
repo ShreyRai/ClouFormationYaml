@@ -57,6 +57,6 @@ Outputs:
     Value: !Ref InfraSubnet
 
   InternetGatewayID:
-    Description: !Ref InfraIGW
+    Value: !Ref InfraIGW
 
       

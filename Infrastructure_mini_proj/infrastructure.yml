@@ -5,27 +5,27 @@ Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: 
+      TemplateURL: https://s3.amazonaws.com/infrastructurefiles/vpc.yml
   
   SGStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: 
+      TemplateURL: https://s3.amazonaws.com/infrastructurefiles/security_group.yml
       Parameters:
-        VPCID: !GetAtt VPCStack.Outputs.VpcId 
+        VPCID: !GetAtt VPCStack.Outputs.VpcID 
   
   EC2Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: 
+      TemplateURL: https://s3.amazonaws.com/infrastructurefiles/ec.yml
       Parameters:
-        SGId: !GetAtt SGStack.Outputs.SecurityGroupId
-        SubnetId: !GetAtt VPCStack.Outputs.SubnetId
+        SGId: !GetAtt SGStack.Outputs.SecurityGroupID
+        SubnetId: !GetAtt VPCStack.Outputs.SubnetID
 
 Outputs:
   InstanceID:
     Description: EC2 instance ID
-    Value: !GetAtt EC2Stack.Ouputs.InstanceID
+    Value: !GetAtt EC2Stack.Outputs.InstanceID
 
   PublicIpAddress:
     Description: EC2 public Ip address

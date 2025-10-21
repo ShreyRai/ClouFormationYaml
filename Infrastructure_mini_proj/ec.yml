@@ -28,6 +28,14 @@ Resources:
       KeyName: !Ref KeyName
       SecurityGroupIds:
         - !Ref SecurityGroupID
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd
+          systemctl start httpd
+          systemctl enable httpd
+          echo "<h1>Hello! Yes it is working! Enjoy Learning</h1>" > /var/www/html/index.html
 
 Outputs:
   InstanceId:

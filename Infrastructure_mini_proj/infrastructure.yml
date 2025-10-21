@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: This is the main infrastructure file 
+
+Resources:
+  VPCStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+  
+  SGStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+      Parameters:
+        VPCID: !GetAtt VPCStack.Outputs.VpcId 
+  
+  EC2Stack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: 
+      Parameters:
+        SGId: !GetAtt SGStack.Outputs.SecurityGroupId
+        SubnetId: !GetAtt VPCStack.Outputs.SubnetId
+
+Outputs:
+  InstanceID:
+    Description: EC2 instance ID
+    Value: !GetAtt EC2Stack.Ouputs.InstanceID
+
+  PublicIpAddress:
+    Description: EC2 public Ip address
+    Value: !GetAtt EC2Stack.Outputs.PublicIp

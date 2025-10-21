@@ -12,21 +12,21 @@ Resources:
     Properties:
       TemplateURL: https://s3.amazonaws.com/infrastructurefiles/security_group.yml
       Parameters:
-        VPCID: !GetAtt VPCStack.Outputs.VpcID 
+        VPCID: !GetAtt VPCStack.Outputs.VPCID 
   
   EC2Stack:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: https://s3.amazonaws.com/infrastructurefiles/ec.yml
       Parameters:
-        SGId: !GetAtt SGStack.Outputs.SecurityGroupID
-        SubnetId: !GetAtt VPCStack.Outputs.SubnetID
+        SecurityGroupID: !GetAtt SGStack.Outputs.SecurityGroupID
+        SubnetID: !GetAtt VPCStack.Outputs.SubnetID
 
 Outputs:
-  InstanceID:
+  InstanceId:
     Description: EC2 instance ID
-    Value: !GetAtt EC2Stack.Outputs.InstanceID
+    Value: !GetAtt EC2Stack.Outputs.InstanceId
 
   PublicIpAddress:
     Description: EC2 public Ip address
-    Value: !GetAtt EC2Stack.Outputs.PublicIp
+    Value: !GetAtt EC2Stack.Outputs.PublicIP

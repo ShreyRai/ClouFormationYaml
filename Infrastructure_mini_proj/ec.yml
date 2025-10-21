@@ -43,4 +43,4 @@ Outputs:
     Value: !Ref InfraEc2
   PublicIP:
     Description: EC2 Public IP
-    Value: !GetAtt InfraEc2.PublicIpAddress
+    Value: !GetAtt InfraEc2.PublicIp
